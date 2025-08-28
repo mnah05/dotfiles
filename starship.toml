@@ -1,0 +1,93 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Top-level format: use $all to keep Starship's default order (simple & clean)
+format = "$all"
+
+# -------------------------
+# Character (prompt symbol)
+# -------------------------
+[character]
+success_symbol = '[➜](bold green)'
+error_symbol   = '[✖](bold red)'
+
+# -------------------------
+# Disable package module
+# -------------------------
+[package]
+disabled = true
+
+# -------------------------
+# Username (shown when not root or when SSH)
+# -------------------------
+[username]
+style_user = "bold yellow"
+style_root = "bold red"
+# show_always = false
+
+# -------------------------
+# Directory (current working dir)
+# -------------------------
+[directory]
+style = "cyan"
+read_only = " (RO)"
+truncation_length = 3
+truncate_to_repo = true
+
+# -------------------------
+# Git branch & status
+# -------------------------
+[git_branch]
+symbol = " "
+style  = "bold purple"
+
+[git_status]
+conflicted = "✖"
+ahead      = "⇡"
+behind     = "⇣"
+staged     = "[●](green)"
+modified   = "✚"
+untracked  = "…"
+stashed    = "⚑"
+style      = "red"
+
+# -------------------------
+# Node / Python versions
+# -------------------------
+[nodejs]
+format = "via [$symbol($version)](green)"
+disabled = false
+
+[python]
+format = "via [$symbol($version)](yellow)"
+disabled = false
+
+# -------------------------
+# Command duration
+# -------------------------
+[cmd_duration]
+min_time = 2000
+style    = "bold dimmed green"
+
+# -------------------------
+# Battery
+# -------------------------
+[battery]
+full_symbol     = "🔋"
+charging_symbol = "⚡"
+format = "[$symbol$percentage]($style) "
+
+[[battery.display]]
+threshold = 10
+style = "bold red"
+
+[[battery.display]]
+threshold = 30
+style = "bold yellow"
+
+[[battery.display]]
+threshold = 100
+style = "bold green"
