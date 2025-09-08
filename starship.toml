@@ -1,93 +1,168 @@
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Inserts a blank line between shell prompts
+# Add breathing room between prompts
 add_newline = true
 
-# Top-level format: use $all to keep Starship's default order (simple & clean)
-format = "$all"
+# Main prompt layout - organized for better flow
+format = """
+$username$hostname$directory$git_branch$git_status$git_metrics
+$cmd_duration$jobs$battery$time
+$line_break$character"""
 
-# -------------------------
-# Character (prompt symbol)
-# -------------------------
+# Right-side prompt for additional info
+right_format = "$status$memory_usage"
+
+# ========================
+# CORE PROMPT ELEMENTS
+# ========================
+
 [character]
-success_symbol = '[➜](bold green)'
-error_symbol   = '[✖](bold red)'
+success_symbol = '[❯](bold green)'
+error_symbol   = '[❯](bold red)' 
+vicmd_symbol   = '[❮](bold blue)'  # only use vicmd_symbol (no duplicates)
 
-# -------------------------
-# Disable package module
-# -------------------------
-[package]
-disabled = true
-
-# -------------------------
-# Username (shown when not root or when SSH)
-# -------------------------
 [username]
-style_user = "bold yellow"
-style_root = "bold red"
-# show_always = false
+style_user = "bold blue"
+style_root = "bold red" 
+format = "[$user]($style)[@](dim white)"
+show_always = false
 
-# -------------------------
-# Directory (current working dir)
-# -------------------------
+[hostname]
+ssh_only = true
+format = "[$hostname]($style) "
+style = "bold green"
+
+# ========================
+# DIRECTORY - Enhanced
+# ========================
+
 [directory]
-style = "cyan"
-read_only = " (RO)"
-truncation_length = 3
-truncate_to_repo = true
+style = "bold cyan"
+read_only = "󰌾 "
+read_only_style = "bold red"
+truncation_length = 4
+truncate_to_repo = false
+truncation_symbol = "…/"
+home_symbol = "󰋞 ~"
+format = "[$path]($style)[$read_only]($read_only_style)"
 
-# -------------------------
-# Git branch & status
-# -------------------------
+# Add some common directory substitutions for cleaner look
+[directory.substitutions]
+"Documents" = "󰈙 Docs"
+"Downloads" = "󰉍 Downloads"
+"Music" = "󰎆 Music"
+"Pictures" = "󰉏 Pictures"
+"Videos" = "󰎞 Videos"
+"Desktop" = "󰇄 Desktop"
+"Projects" = "󰲹 Projects"
+"Code" = "󰨞 Code"
+
+# ========================
+# GIT - More informative
+# ========================
+
 [git_branch]
-symbol = " "
-style  = "bold purple"
+symbol = "󰊢 "
+style = "bold purple"
+format = " [$symbol$branch]($style)"
 
 [git_status]
-conflicted = "✖"
-ahead      = "⇡"
-behind     = "⇣"
-staged     = "[●](green)"
-modified   = "✚"
-untracked  = "…"
-stashed    = "⚑"
-style      = "red"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+conflicted = "=${count}"
+deleted = "✘${count}"
+renamed = "»${count}"
+modified = "!${count}"
+staged = "+${count}"
+untracked = "?${count}"
+stashed = "󰏗${count}"
+format = "[$all_status$ahead_behind]($style)"
+style = "bold red"
 
-# -------------------------
-# Node / Python versions
-# -------------------------
-[nodejs]
-format = "via [$symbol($version)](green)"
+# Add git metrics for more insight
+[git_metrics]
+added_style = "bold green"
+deleted_style = "bold red"
+format = " [+$added]($added_style)/[-$deleted]($deleted_style)"
 disabled = false
 
-[python]
-format = "via [$symbol($version)](yellow)"
-disabled = false
+# ========================
+# SYSTEM METRICS
+# ========================
 
-# -------------------------
-# Command duration
-# -------------------------
 [cmd_duration]
-min_time = 2000
-style    = "bold dimmed green"
+min_time = 2000                 # Only show if > 2 seconds
+format   = "[$duration]($style) "
+style    = "bold yellow"
+show_milliseconds = false        # 👈 disable ms
 
-# -------------------------
-# Battery
-# -------------------------
+[jobs]
+format = "[$symbol$number]($style) "
+symbol = "󰜎 "
+style = "bold blue"
+
 [battery]
-full_symbol     = "🔋"
-charging_symbol = "⚡"
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
 format = "[$symbol$percentage]($style) "
 
 [[battery.display]]
-threshold = 10
+threshold = 20
 style = "bold red"
 
 [[battery.display]]
-threshold = 30
+threshold = 60
 style = "bold yellow"
 
 [[battery.display]]
 threshold = 100
 style = "bold green"
+
+[time]
+disabled = false
+format = "[$time]($style)"
+time_format = "%H:%M"
+style = "bold dimmed white"
+
+# ========================
+# RIGHT SIDE INFO
+# ========================
+
+[status]
+style = "bold red"
+symbol = "✘"
+format = "[$symbol$status]($style) "
+disabled = false
+
+[memory_usage]
+disabled = false
+threshold = 70
+format = "[${ram}]($style)"
+style = "bold dimmed yellow"
+
+# ========================
+# OS INDICATOR
+# ========================
+
+[os]
+format = "[$symbol]($style)"
+style = "bold white"
+disabled = false
+
+[os.symbols]
+Linux   = "󰌽"
+Windows = "󰍲"
+Macos   = "󰀵"   # FIXED variant (was macOS)
+
+# ========================
+# MISC MODULES
+# ========================
+
+[package]
+disabled = true  # Keep disabled as you had it
+
+[line_break]
+disabled = false
