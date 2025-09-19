@@ -15,7 +15,7 @@ background-blur = true
 
 # Font Configuration
 font-family = "JetBrains Mono"
-font-size = 16
+font-size = 20
 font-feature = +liga
 
 # Colors - Catppuccin Macchiato Theme
@@ -63,3 +63,10 @@ quit-after-last-window-closed = true
 
 shell-integration-features = no-cursor
 cursor-style = block
+
+# Wallpaper Configuration (Requires Ghostty 1.2.0+)
+background-image = "/Users/hasandot/Downloads/wallhaven-852q62.png"
+background-image-opacity = 0.25
+background-image-position = center
+background-image-fit = cover
+background-image-repeat = true
