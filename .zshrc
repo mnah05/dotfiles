@@ -56,10 +56,6 @@ bindkey '^R' fzf-history-widget  # ctrl+r to search history
 eval "$(zoxide init zsh)"
 alias cd="z"   # optional: replace cd with z
 
-# ========================
-# Bun completions
-# ========================
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # ========================
 # History setup
@@ -78,14 +74,3 @@ setopt hist_verify
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 export PATH="/Users/nahasan/.bun/bin:$PATH"
-
-# bun completions
-[ -s "/Users/nahasan/.bun/_bun" ] && source "/Users/nahasan/.bun/_bun"
-
-# pnpm
-export PNPM_HOME="/Users/nahasan/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
