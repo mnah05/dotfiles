@@ -7,10 +7,8 @@ call plug#begin('~/.vim/plugged')
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
-" Beautiful colorschemes
-Plug 'catppuccin/vim', { 'as': 'catppuccin' }
-Plug 'folke/tokyonight.nvim'
-Plug 'rebelot/kanagawa.nvim'
+" Colorschemes
+Plug 'morhetz/gruvbox'
 
 call plug#end()
 
@@ -18,17 +16,13 @@ call plug#end()
 set termguicolors
 set background=dark
 
-" Choose one (uncomment your favorite after :PlugInstall):
-colorscheme catppuccin_mocha
-" colorscheme catppuccin_macchiato
-" colorscheme catppuccin_frappe
-" colorscheme tokyonight-night
-" colorscheme tokyonight-storm
-" colorscheme kanagawa
+" Use silent! to prevent error before plugin is installed
+silent! colorscheme gruvbox
 
-" Make it even prettier
+" make cursorline blend in
+highlight CursorLine   cterm=none gui=none ctermbg=235 guibg=#3c3836
+highlight SignColumn   ctermbg=235 guibg=#3c3836
 set cursorline
-highlight CursorLine cterm=NONE ctermbg=235 guibg=#2a2b3c
 set signcolumn=yes
 
 " Enable syntax highlighting
@@ -65,7 +59,8 @@ set mouse=a
 " Set encoding
 set encoding=utf-8
 
-set clipboard=unnamedplus
+" Clipboard - macOS uses 'unnamed'
+set clipboard=unnamed
 
 " Set leader key to space
 let mapleader = " "
@@ -89,4 +84,4 @@ let g:fzf_colors = {
   \ 'pointer': ['fg', 'Exception'],
   \ 'marker':  ['fg', 'Keyword'],
   \ 'spinner': ['fg', 'Label'],
- 
+  \ 'header':  ['fg', 'Comment'] }
