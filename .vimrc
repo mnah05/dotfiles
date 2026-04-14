@@ -10,9 +10,77 @@ Plug 'junegunn/fzf.vim'
 " Colorschemes
 Plug 'morhetz/gruvbox'
 
+" LSP and Autocompletion
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 call plug#end()
 
-" Colorscheme configuration
+" ============================================================================
+" COC.NVIM CONFIGURATION
+" ============================================================================
+
+" coc.nvim requires these settings
+set hidden
+set cmdheight=2
+set updatetime=300
+set shortmess+=c
+set signcolumn=yes
+
+" Use tab for trigger completion and navigate
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion manually
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" Navigate diagnostics
+nmap <silent> [d <Plug>(coc-diagnostic-prev)
+nmap <silent> ]d <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Show documentation
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
+
+" Highlight symbol under cursor
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Rename symbol
+nmap <leader>rn <Plug>(coc-rename)
+
+" Format selected code
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Organize imports for Go
+autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
+
+" ============================================================================
+" COLORS & UI
+" ============================================================================
+
 set termguicolors
 set background=dark
 
@@ -65,7 +133,10 @@ set clipboard=unnamed
 " Set leader key to space
 let mapleader = " "
 
-" FZF keybindings with leader
+" ============================================================================
+" FZF KEYBINDINGS
+" ============================================================================
+
 nnoremap <leader>sf :Files<CR>
 nnoremap <leader>ss :Rg<CR>
 nnoremap <leader>sb :Buffers<CR>
