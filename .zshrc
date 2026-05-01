@@ -1,151 +1,159 @@
-# ═══════════════════════════════════════════════════════════════
-# 🌿 ZEN ZSH CONFIG - Minimal yet Powerful
-# ═══════════════════════════════════════════════════════════════
+#!/usr/bin/env zsh
+# ============================================
+# ZSH Configuration File
+# ============================================
 
-# ── Core Settings ──────────────────────────────────────────────
-export LANG=en_US.UTF-8
-export EDITOR="nvim"
-export TERM=xterm-256color
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
-# Disable annoying features
-setopt NO_BEEP
-setopt NO_FLOW_CONTROL
-stty -ixon 2>/dev/null
+HOMEBREW_PREFIX="/opt/homebrew"
+BUN_INSTALL="$HOME/.bun"
+LOCAL_BIN="$HOME/.local/bin"
 
-# ── Oh-My-Zsh ──────────────────────────────────────────────────
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
-DISABLE_AUTO_UPDATE="true"
-DISABLE_MAGIC_FUNCTIONS="true"
-DISABLE_AUTO_TITLE="true"
-ENABLE_CORRECTION="true"
-HIST_STAMPS="yyyy-mm-dd"
+mkdir -p "$XDG_CONFIG_HOME/zsh"
+mkdir -p "$LOCAL_BIN"
 
-# Essential plugins only
-plugins=(
-  git
-  colored-man-pages
-  command-not-found
-)
+# ============================================
+# HISTORY
+# ============================================
 
-source $ZSH/oh-my-zsh.sh
-
-# ── PATH (Clean & Deduplicated) ────────────────────────────────
-export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/.bun/bin:$PATH"
-export PATH="$(go env GOPATH 2>/dev/null)/bin:$PATH"
-export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
-export PATH="/Users/mnah05/.codeium/windsurf/bin:$PATH"
-eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null
-
-# ── History ────────────────────────────────────────────────────
-HISTFILE=$HOME/.zhistory
 HISTSIZE=10000
-SAVEHIST=10000
-setopt share_history
-setopt hist_expire_dups_first
-setopt hist_ignore_dups
-setopt hist_ignore_space
-setopt hist_verify
-setopt extended_history
+SAVEHIST=$HISTSIZE
+HISTFILE="$XDG_CONFIG_HOME/zsh/.zsh_history"
 
-# ── Modern Tools ───────────────────────────────────────────────
+setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
 
-# Eza (modern ls)
-if command -v eza &>/dev/null; then
-  alias ls="eza --icons --group-directories-first"
-  alias ll="eza -lh --icons --group-directories-first"
-  alias la="eza -lha --icons --group-directories-first"
-  alias lt="eza -T --icons -L 3"
-  alias l="eza -lh --icons --git"
+# ============================================
+# PLUGINS (Manually managed)
+# ============================================
+
+AUTOSUGGEST_DIR="$XDG_DATA_HOME/zsh-autosuggestions"
+if [[ ! -d "$AUTOSUGGEST_DIR" ]]; then
+    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$AUTOSUGGEST_DIR" 2>/dev/null
 fi
+[[ -f "$AUTOSUGGEST_DIR/zsh-autosuggestions.zsh" ]] && source "$AUTOSUGGEST_DIR/zsh-autosuggestions.zsh"
 
-# Zoxide (smart cd)
-if command -v zoxide &>/dev/null; then
-  eval "$(zoxide init zsh)"
-  alias cd="z"
-  alias zz="z -"
+ZSH_SYNTAX_DIR="$XDG_DATA_HOME/zsh-syntax-highlighting"
+if [[ ! -d "$ZSH_SYNTAX_DIR" ]]; then
+    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_DIR" 2>/dev/null
 fi
+[[ -f "$ZSH_SYNTAX_DIR/zsh-syntax-highlighting.zsh" ]] && source "$ZSH_SYNTAX_DIR/zsh-syntax-highlighting.zsh"
 
-# FZF (fuzzy finder)
-if command -v fzf &>/dev/null; then
-  source <(fzf --zsh 2>/dev/null)
-  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview-window=hidden"
-  
-  # FZF-powered functions
-  f() { nvim "$(fzf --preview 'bat --color=always {}')"; }
-  frg() { nvim "$(rg --files | fzf --preview 'rg --pretty --context 3 {q} {}')"; }
-  fcd() { cd "$(zoxide query -l | fzf)"; }
-fi
+# ============================================
+# PATH
+# ============================================
 
-# ── Aliases ────────────────────────────────────────────────────
+add_to_path() {
+    [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
+}
 
-# Config shortcuts
-alias zc="nvim ~/.zshrc"
-alias zr="source ~/.zshrc"
-alias vc="nvim ~/.config/nvim"
+add_to_path "$LOCAL_BIN"
+add_to_path "$BUN_INSTALL/bin"
+add_to_path "$HOMEBREW_PREFIX/opt/node@22/bin"
 
-# Editor
-alias v="nvim"
-alias vi="nvim"
+# ============================================
+# BUN
+# ============================================
 
-# Git
-alias g="git"
-alias gs="git status -sb"
-alias ga="git add"
-alias gap="git add -p"
-alias gc="git commit -v"
-alias gcm="git commit -m"
-alias gp="git push"
-alias gpf="git push --force-with-lease"
-alias gl="git log --oneline --graph --decorate -20"
-alias gla="git log --oneline --graph --decorate --all"
-alias gf="git fetch"
-alias gpl="git pull"
-alias gb="git branch -vv"
-alias gd="git diff"
-alias gds="git diff --staged"
-alias gco="git checkout"
-alias grs="git restore"
-alias grst="git restore --staged"
+[[ -s "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
 
-# Docker
-alias d="docker"
-alias dc="docker compose"
-alias dps="docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+# ============================================
+# NVM (Lazy Loading via Homebrew)
+# ============================================
 
-# Brew
-alias bu="brew update && brew upgrade && brew cleanup"
-alias bd="brew doctor"
-
-# Utilities
-alias ..="cd .."
-alias ...="cd ../.."
-alias ....="cd ../../.."
-alias mkdir="mkdir -pv"
-alias cp="cp -iv"
-alias mv="mv -iv"
-alias rm="rm -iv"
-alias clr="clear"
-alias myip="curl -s ifconfig.me && echo"
-alias serve="python3 -m http.server"
-
-# Search web
-search() { open "https://search.brave.com/search?q=${*// /+}"; }
-
-# ── Tool Integrations ──────────────────────────────────────────
-
-# NVM
 export NVM_DIR="$HOME/.nvm"
-[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+if [[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ]]; then
+    lazy_load_nvm() {
+        unset -f nvm node npm npx
+        source "$HOMEBREW_PREFIX/opt/nvm/nvm.sh"
+        [[ -s "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm"
+    }
+    nvm() { lazy_load_nvm; nvm "$@"; }
+    node() { lazy_load_nvm; node "$@"; }
+    npm() { lazy_load_nvm; npm "$@"; }
+    npx() { lazy_load_nvm; npx "$@"; }
+fi
 
-# Bun
-export BUN_INSTALL="$HOME/.bun"
-[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+# ============================================
+# STARSHIP
+# ============================================
 
-# Zsh extras (Homebrew)
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh 2>/dev/null
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2>/dev/null
+if command -v starship &>/dev/null; then
+    eval "$(starship init zsh)"
+else
+    PS1='%F{blue}%~%f %# '
+fi
 
-# ═══════════════════════════════════════════════════════════════
+# ============================================
+# FZF
+# ============================================
+
+if command -v fzf &>/dev/null; then
+    eval "$(fzf --zsh)"
+    [[ -n $(command -v fd) ]] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+fi
+
+# ============================================
+# ZOXIDE
+# ============================================
+
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init --cmd cd zsh)"
+fi
+
+# ============================================
+# COMPLETION
+# ============================================
+
+autoload -Uz compinit
+compinit -C
+
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' menu select
+
+# ============================================
+# ALIASES
+# ============================================
+
+alias clr='clear'
+alias reload='source ~/.zshrc'
+
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons'
+    alias ll='eza -la --icons --git'
+    alias lt='eza --tree --icons --level=2'
+    alias lta='eza --tree --icons --level=3 --all'
+else
+    alias ll='ls -lah'
+fi
+
+if command -v bun &>/dev/null; then
+    alias bro='bun run dev'
+    alias bi='bun install'
+    alias ba='bun add'
+    alias br='bun remove'
+fi
+
+alias gs='git status'
+alias gco='git checkout'
+alias gp='git push'
+alias gl='git pull'
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# ============================================
+# OPTIONS
+# ============================================
+
+bindkey -e
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS INTERACTIVE_COMMENTS
+unsetopt BEEP
+
+# ============================================
+# LOCAL CONFIG
+# ============================================
+
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
