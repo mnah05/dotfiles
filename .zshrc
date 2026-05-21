@@ -25,20 +25,10 @@ HISTFILE="$XDG_CONFIG_HOME/zsh/.zsh_history"
 setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
 
 # ============================================
-# PLUGINS (Manually managed)
+# PLUGINS
 # ============================================
 
-AUTOSUGGEST_DIR="$XDG_DATA_HOME/zsh-autosuggestions"
-if [[ ! -d "$AUTOSUGGEST_DIR" ]]; then
-    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$AUTOSUGGEST_DIR" 2>/dev/null
-fi
-[[ -f "$AUTOSUGGEST_DIR/zsh-autosuggestions.zsh" ]] && source "$AUTOSUGGEST_DIR/zsh-autosuggestions.zsh"
-
-ZSH_SYNTAX_DIR="$XDG_DATA_HOME/zsh-syntax-highlighting"
-if [[ ! -d "$ZSH_SYNTAX_DIR" ]]; then
-    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_DIR" 2>/dev/null
-fi
-[[ -f "$ZSH_SYNTAX_DIR/zsh-syntax-highlighting.zsh" ]] && source "$ZSH_SYNTAX_DIR/zsh-syntax-highlighting.zsh"
+[[ -f "$XDG_CONFIG_HOME/zsh/plugins.zsh" ]] && source "$XDG_CONFIG_HOME/zsh/plugins.zsh"
 
 # ============================================
 # PATH
@@ -76,12 +66,10 @@ if [[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ]]; then
 fi
 
 # ============================================
-# STARSHIP
+# FALLBACK PROMPT
 # ============================================
 
-if command -v starship &>/dev/null; then
-    eval "$(starship init zsh)"
-else
+if ! command -v starship &>/dev/null; then
     PS1='%F{blue}%~%f %# '
 fi
 
@@ -143,7 +131,7 @@ alias gl='git pull'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-
+alias n='nvim'
 # ============================================
 # OPTIONS
 # ============================================
@@ -157,3 +145,6 @@ unsetopt BEEP
 # ============================================
 
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
+export PATH="$JAVA_HOME/bin:$PATH"
