@@ -38,6 +38,7 @@ add_to_path() {
     [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
 }
 
+add_to_path "$HOME/go/bin"
 add_to_path "$LOCAL_BIN"
 add_to_path "$BUN_INSTALL/bin"
 add_to_path "$HOMEBREW_PREFIX/opt/node@22/bin"
@@ -148,3 +149,22 @@ unsetopt BEEP
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
 export PATH="$JAVA_HOME/bin:$PATH"
+alias g++="g++-15"
+alias gcc="gcc-15"
+export PATH="$(go env GOPATH)/bin:$PATH"
+
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+fpath=(~/.grok/completions/zsh $fpath)
+autoload -Uz compinit && compinit -C
+# <<< grok installer <<<
+
+# Added by Devin
+export PATH="/Users/mnah05/.codeium/windsurf/bin:$PATH"
+
+# bun completions
+[ -s "/Users/mnah05/.bun/_bun" ] && source "/Users/mnah05/.bun/_bun"
+
+# Added by Cap
+export PATH="/Users/mnah05/.cap/bin:$PATH"
