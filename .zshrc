@@ -1,170 +1,149 @@
-#!/usr/bin/env zsh
-# ============================================
-# ZSH Configuration File
-# ============================================
-
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-
-HOMEBREW_PREFIX="/opt/homebrew"
-BUN_INSTALL="$HOME/.bun"
-LOCAL_BIN="$HOME/.local/bin"
-
-mkdir -p "$XDG_CONFIG_HOME/zsh"
-mkdir -p "$LOCAL_BIN"
-
-# ============================================
-# HISTORY
-# ============================================
-
-HISTSIZE=10000
-SAVEHIST=$HISTSIZE
-HISTFILE="$XDG_CONFIG_HOME/zsh/.zsh_history"
-
-setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
-
-# ============================================
-# PLUGINS
-# ============================================
-
-[[ -f "$XDG_CONFIG_HOME/zsh/plugins.zsh" ]] && source "$XDG_CONFIG_HOME/zsh/plugins.zsh"
-
-# ============================================
-# PATH
-# ============================================
-
-add_to_path() {
-    [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
-}
-
-add_to_path "$HOME/go/bin"
-add_to_path "$LOCAL_BIN"
-add_to_path "$BUN_INSTALL/bin"
-add_to_path "$HOMEBREW_PREFIX/opt/node@22/bin"
-
-# ============================================
-# BUN
-# ============================================
-
-[[ -s "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
-
-# ============================================
-# NVM (Lazy Loading via Homebrew)
-# ============================================
-
-export NVM_DIR="$HOME/.nvm"
-if [[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ]]; then
-    lazy_load_nvm() {
-        unset -f nvm node npm npx
-        source "$HOMEBREW_PREFIX/opt/nvm/nvm.sh"
-        [[ -s "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm" ]] && source "$HOMEBREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm"
-    }
-    nvm() { lazy_load_nvm; nvm "$@"; }
-    node() { lazy_load_nvm; node "$@"; }
-    npm() { lazy_load_nvm; npm "$@"; }
-    npx() { lazy_load_nvm; npx "$@"; }
+# ─── Homebrew ─────────────────────────────────────────────
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# ============================================
-# FALLBACK PROMPT
-# ============================================
 
-if ! command -v starship &>/dev/null; then
-    PS1='%F{blue}%~%f %# '
+# ─── Editor ───────────────────────────────────────────────
+export EDITOR=vim
+export VISUAL="$EDITOR"
+
+
+# ─── PATH ─────────────────────────────────────────────────
+typeset -U path PATH
+
+path=(
+  "$HOME/.local/bin"
+  "$HOME/.grok/bin"
+  "$HOME/go/bin"
+  $path
+)
+
+
+# ─── Grok completions ────────────────────────────────────
+if [[ -d "$HOME/.grok/completions/zsh" ]]; then
+  fpath=("$HOME/.grok/completions/zsh" $fpath)
 fi
 
-# ============================================
-# FZF
-# ============================================
 
-if command -v fzf &>/dev/null; then
-    eval "$(fzf --zsh)"
-    [[ -n $(command -v fd) ]] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-fi
+# ─── History ──────────────────────────────────────────────
+HISTSIZE=50000
+SAVEHIST=50000
+HISTFILE="$HOME/.zsh_history"
 
-# ============================================
-# ZOXIDE
-# ============================================
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_IGNORE_SPACE
 
-if command -v zoxide &>/dev/null; then
-    eval "$(zoxide init --cmd cd zsh)"
-fi
 
-# ============================================
-# COMPLETION
-# ============================================
-
+# ─── Completion ───────────────────────────────────────────
+zmodload zsh/complist
 autoload -Uz compinit
-compinit -C
 
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
-# ============================================
-# ALIASES
-# ============================================
-
-alias clr='clear'
-alias reload='source ~/.zshrc'
-
-if command -v eza &>/dev/null; then
-    alias ls='eza --icons'
-    alias ll='eza -la --icons --git'
-    alias lt='eza --tree --icons --level=2'
-    alias lta='eza --tree --icons --level=3 --all'
-else
-    alias ll='ls -lah'
+if [[ -n "$LS_COLORS" ]]; then
+  zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 fi
 
-if command -v bun &>/dev/null; then
-    alias bro='bun run dev'
-    alias bi='bun install'
-    alias ba='bun add'
-    alias br='bun remove'
+compinit
+
+
+# ─── Keys ─────────────────────────────────────────────────
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+
+
+# ─── Colors ───────────────────────────────────────────────
+# macOS grep does not support --color.
+# If GNU grep is installed through Homebrew, use ggrep.
+if command -v ggrep >/dev/null 2>&1; then
+  alias grep='ggrep --color=auto'
 fi
 
+
+# ─── Zoxide ───────────────────────────────────────────────
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+  alias cd='z'
+fi
+
+
+# ─── Aliases ──────────────────────────────────────────────
+alias bup='brew update && brew upgrade'
+
+if command -v eza >/dev/null 2>&1; then
+  alias ll='eza --long --all --git --icons=auto'
+  alias la='eza --all --icons=auto'
+  alias ls='eza --icons=auto'
+fi
+
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat --paging=never'
+fi
+
+alias md='mkdir -p'
+
+# Git shortcuts
 alias gs='git status'
-alias gco='git checkout'
+alias ga='git add'
+alias gc='git commit'
 alias gp='git push'
-alias gl='git pull'
+alias gl='git log --oneline --graph --decorate --all'
+alias gd='git diff'
 
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias n='nvim'
-# ============================================
-# OPTIONS
-# ============================================
-
-bindkey -e
-setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS INTERACTIVE_COMMENTS
-unsetopt BEEP
-
-# ============================================
-# LOCAL CONFIG
-# ============================================
-
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
-export PATH="$JAVA_HOME/bin:$PATH"
-alias g++="g++-15"
-alias gcc="gcc-15"
-export PATH="$(go env GOPATH)/bin:$PATH"
+# Miscellaneous helpers
+alias serve='python3 -m http.server 8000'
+alias ports='lsof -iTCP -sTCP:LISTEN -nP'
+alias myip='curl -s ifconfig.me && echo'
 
 
-# >>> grok installer >>>
-export PATH="$HOME/.grok/bin:$PATH"
-fpath=(~/.grok/completions/zsh $fpath)
-autoload -Uz compinit && compinit -C
-# <<< grok installer <<<
+# ─── Fast ─────────────────────────────────────────────────
+if command -v fast >/dev/null 2>&1; then
+  fast() {
+    command fast --verbose "$@"
+  }
+fi
 
-# Added by Devin
-export PATH="/Users/mnah05/.codeium/windsurf/bin:$PATH"
 
-# bun completions
-[ -s "/Users/mnah05/.bun/_bun" ] && source "/Users/mnah05/.bun/_bun"
+# ─── Go ───────────────────────────────────────────────────
+export GOPATH="$HOME/go"
 
-# Added by Cap
-export PATH="/Users/mnah05/.cap/bin:$PATH"
+
+# ─── NVM / Node ───────────────────────────────────────────
+export NVM_DIR="$HOME/.nvm"
+
+if [[ -s /opt/homebrew/opt/nvm/nvm.sh ]]; then
+  source /opt/homebrew/opt/nvm/nvm.sh
+fi
+
+if [[ -s /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm ]]; then
+  source /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm
+fi
+
+
+# ─── fzf ──────────────────────────────────────────────────
+if [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
+  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+fi
+
+if [[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]]; then
+  source /opt/homebrew/opt/fzf/shell/completion.zsh
+fi
+
+
+# ─── Git Delta ────────────────────────────────────────────
+if command -v delta >/dev/null 2>&1; then
+  export GIT_PAGER=delta
+fi
+
+# ─── Fast ─────────────────────────────────────────────────
+unalias fast 2>/dev/null
+
+if (( $+commands[fast] )); then
+  fast() {
+    command fast --verbose "$@"
+  }
+fi
