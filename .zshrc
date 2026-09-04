@@ -147,3 +147,22 @@ if (( $+commands[fast] )); then
     command fast --verbose "$@"
   }
 fi
+
+# Use Chrome for tools that rely on Puppeteer (e.g. fast)
+export PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+
+# ─── Starship prompt ──────────────────────────────────────
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# Added by Antigravity IDE
+export PATH="/Users/mnah/.antigravity-ide/antigravity-ide/bin:$PATH"
+export PATH=$PATH:$HOME/go/bin
+alias aws-login="aws-vault exec hasan -- zsh"
+alias myip='curl https://checkip.amazonaws.com/'
+
+
+# Rust toolchain installed through Homebrew rustup
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
